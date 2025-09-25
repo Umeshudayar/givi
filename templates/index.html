@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Givi - Smart Delivery Predictions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6366F1;
+            --secondary-color: #F8FAFC;
+            --accent-color: #818CF8;
+            --text-color: #1E293B;
+            --light-text: #64748B;
+            --border-color: #E2E8F0;
+            --success-color: #22C55E;
+            --warning-color: #F97316;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: white;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            letter-spacing: -0.5px;
+        }
+
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 1.6rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 0.95rem;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary-color);
+        }
+
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1.2rem;
+            color: var(--text-color);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--light-text);
+            max-width: 700px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+        }
+
+        .prediction-form {
+            background-color: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--card-shadow);
+            max-width: 800px;
+            margin: 0 auto 3rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        .form-group input, .form-group select {
+            padding: 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background-color: #fff;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .predict-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 0.85rem 2.2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .predict-btn:hover {
+            background-color: #4F46E5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .predict-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .predict-btn i {
+            margin-left: 0.5rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: var(--primary-color);
+        }
+
+        .loading .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results-container {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto 3rem;
+        }
+
+        .prediction-card {
+            background-color: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prediction-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background-color: var(--primary-color);
+        }
+
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.8rem;
+        }
+
+        .prediction-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .prediction-time-wrapper {
+            display: flex;
+            align-items: baseline;
+        }
+
+        .prediction-time {
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            line-height: 1;
+        }
+
+        .prediction-unit {
+            font-size: 1.2rem;
+            color: var(--light-text);
+            font-weight: 500;
+            margin-left: 0.3rem;
+        }
+
+        .confidence-badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: var(--success-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .confidence-badge i {
+            margin-right: 0.5rem;
+        }
+
+        .prediction-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem;
+            background-color: var(--secondary-color);
+            border-radius: 10px;
+        }
+
+        .detail-item i {
+            margin-right: 0.7rem;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .detail-item span {
+            font-size: 0.95rem;
+            color: var(--text-color);
+        }
+
+        .factors-card {
+            background-color: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .factors-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.3rem;
+            display: flex;
+            align-items: center;
+            color: var(--text-color);
+        }
+
+        .factors-title i {
+            margin-right: 0.7rem;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .factor {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.2rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .factor:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .factor i {
+            margin-right: 0.8rem;
+            margin-top: 0.2rem;
+            font-size: 1.1rem;
+        }
+
+        .factor-content h4 {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: var(--text-color);
+            font-size: 1.05rem;
+        }
+
+        .factor-content p {
+            color: var(--light-text);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .factor.impact-high i {
+            color: var(--warning-color);
+        }
+
+        .factor.impact-medium i {
+            color: #94A3B8;
+        }
+
+        .factor.impact-low i {
+            color: var(--success-color);
+        }
+
+        .footer {
+            background-color: white;
+            padding: 2.5rem 0;
+            margin-top: 4rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .footer-logo i {
+            margin-right: 0.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-left: 1.8rem;
+        }
+
+        .footer-links a {
+            color: var(--light-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .copyright {
+            color: var(--light-text);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .error-message {
+            background-color: #FEF2F2;
+            border: 1px solid #FECACA;
+            color: #DC2626;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .prediction-time {
+                font-size: 2.6rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav ul {
+                margin-top: 1rem;
+            }
+            
+            nav ul li {
+                margin: 0 0.75rem;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .footer-links {
+                margin-top: 1.5rem;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .footer-links li {
+                margin: 0 0.75rem 0.5rem;
+            }
+            
+            .prediction-form {
+                padding: 1.8rem;
+            }
+            
+            .prediction-card {
+                padding: 1.8rem;
+            }
+            
+            .factors-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-shipping-fast"></i>
+                <span>Givi</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="/api/docs" target="_blank">API</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <h1>Smart Delivery Predictions</h1>
+                <p>Know exactly when your food will arrive with Givi's precise delivery time estimates powered by LSTM deep learning. No vague ranges, just accurate predictions you can count on.</p>
+            </div>
+        </section>
+
+        <section class="prediction-form">
+            <div class="container">
+                <form id="deliveryForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="restaurant">Restaurant</label>
+                            <input type="text" id="restaurant" name="restaurant" placeholder="Enter restaurant name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="location">Delivery Location</label>
+                            <input type="text" id="location" name="location" placeholder="Enter your address" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="orderTime">Order Time</label>
+                            <input type="time" id="orderTime" name="orderTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="orderType">Order Type</label>
+                            <select id="orderType" name="orderType">
+                                <option value="standard">Standard</option>
+                                <option value="priority">Priority</option>
+                                <option value="scheduled">Scheduled</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="predict-btn">
+                        <span class="btn-text">Predict Delivery Time</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>AI is analyzing delivery patterns...</p>
+                    </div>
+                    
+                    <div class="error-message" id="errorMessage">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="errorText">Something went wrong. Please try again.</span>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="results-container" id="resultsContainer">
+            <div class="prediction-card">
+                <div class="prediction-header">
+                    <h2>Estimated Delivery Time</h2>
+                    <div class="prediction-time-wrapper">
+                        <span class="prediction-time" id="predictionTime">24</span>
+                        <span class="prediction-unit">minutes</span>
+                    </div>
+                </div>
+                
+                <div class="confidence-badge">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="confidenceText">85% Confidence</span>
+                </div>
+                
+                <div class="prediction-details">
+                    <div class="detail-item">
+                        <i class="fas fa-store"></i>
+                        <span id="restaurantName">Restaurant Name</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span id="deliveryLocation">Delivery Location</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-clock"></i>
+                        <span id="orderTimeDisplay">Order Time</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="factors-card">
+                <h3 class="factors-title">
+                    <i class="fas fa-info-circle"></i>
+                    Factors Affecting Your Delivery
+                </h3>
+                <div id="factorsList">
+                    <!-- Factors will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <div class="footer-logo">
+                        <i class="fas fa-shipping-fast"></i>
+                        <span>Givi</span>
+                    </div>
+                    <div class="copyright">© 2024 Givi. All rights reserved.</div>
+                </div>
+                <ul class="footer-links">
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Help Center</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Set current time as default
+        document.getElementById('orderTime').value = new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
+        
+        document.getElementById('deliveryForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('resultsContainer');
+            const errorMessage = document.getElementById('errorMessage');
+            const submitBtn = document.querySelector('.predict-btn');
+            
+            // Show loading state
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            errorMessage.style.display = 'none';
+            submitBtn.disabled = true;
+            
+            const data = {
+                restaurant: document.getElementById('restaurant').value,
+                location: document.getElementById('location').value,
+                orderTime: document.getElementById('orderTime').value,
+                orderType: document.getElementById('orderType').value
+            };
+            
+            try {
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const prediction = await response.json();
+                
+                // Update UI with prediction results
+                document.getElementById('predictionTime').textContent = prediction.estimatedTime;
+                document.getElementById('confidenceText').textContent = `${Math.round(prediction.confidence * 100)}% Confidence`;
+                document.getElementById('restaurantName').textContent = data.restaurant;
+                document.getElementById('deliveryLocation').textContent = data.location;
+                document.getElementById('orderTimeDisplay').textContent = data.orderTime;
+                
+                // Update factors
+                const factorsList = document.getElementById('factorsList');
+                factorsList.innerHTML = '';
+                
+                prediction.factors.forEach(factor => {
+                    const factorElement = document.createElement('div');
+                    factorElement.className = `factor impact-${factor.impact}`;
+                    
+                    let iconClass = 'fa-info-circle';
+                    if (factor.impact === 'high') iconClass = 'fa-exclamation-circle';
+                    else if (factor.impact === 'low') iconClass = 'fa-check-circle';
+                    
+                    factorElement.innerHTML = `
+                        <i class="fas ${iconClass}"></i>
+                        <div class="factor-content">
+                            <h4>${factor.name}</h4>
+                            <p>${factor.description}</p>
+                        </div>
+                    `;
+                    factorsList.appendChild(factorElement);
+                });
+                
+                loading.style.display = 'none';
+                result.style.display = 'block';
+                result.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('errorText').textContent = 'Error making prediction. Please check your connection and try again.';
+                errorMessage.style.display = 'block';
+                loading.style.display = 'none';
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
