@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-Givi Smart Delivery Predictions - Main runner script
-"""
-
 import os
 import sys
 import logging
@@ -24,20 +19,20 @@ def setup_project():
     data_file = "data/processed/delivery_data.csv"
     if not os.path.exists(data_file):
         logger.info("Generating sample data...")
-        os.system("python data/sample_data.py")
+        os.system("python3 data/sample_data.py")
     
     # Train model if not exists
     model_file = "saved_models/givi_lstm_model.h5"
     if not os.path.exists(model_file):
         logger.info("Training LSTM model...")
-        os.system("python train_model.py")
+        os.system("python3 train_model.py")
     
     logger.info("Setup complete!")
 
 def run_app():
     """Run the FastAPI application"""
     logger.info("Starting Givi Smart Delivery Predictions...")
-    os.system("python app.py")
+    os.system("python3 app.py")
 
 def run_tests():
     """Run test suite"""
@@ -57,7 +52,7 @@ def main():
     elif args.test:
         run_tests()
     elif args.train:
-        os.system("python train_model.py")
+        os.system("python3 train_model.py")
     else:
         # Default: setup and run
         setup_project()
