@@ -40,6 +40,6 @@ async def predict_delivery_time(
         raise HTTPException(status_code=500, detail="Prediction failed")
 
 @router.get("/model/info")
-async def get_model_info(predictor: DeliveryPredictor = Depends(get_predictor)):
+async def get_model_info(predictor:  = Depends(get_predictor)):
     """Get model information and statistics"""
     return predictor.get_model_info()
