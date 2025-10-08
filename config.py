@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # API Configuration
-    API_HOST: str = "0.0.0.0"
+    API_HOST: str = "127.0.1"
     API_PORT: int = 8000
     DEBUG: bool = True
     
