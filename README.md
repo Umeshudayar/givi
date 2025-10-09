@@ -45,7 +45,12 @@ givi-delivery-predictions/
 │   ├── routes.py           # API endpoints
 │   └── schemas.py          # Request/response models
 ├── models/                  # ML models
-│   ├── lstm_model.py       # LSTM model definition
+│   Input: Sequence of 5 previous deliveries
+├── Numerical features (7 features)
+│   └── [distance, hour, day_of_week, weekend, rush_hour, traffic, weather]
+├── Restaurant embedding (learned)
+└── Combined through LSTM layers
+    ├      # LSTM model definition
 │   └── predictor.py        # Prediction logic
 ├── templates/               # Frontend templates
 │   └── index.html          # Main web interface
