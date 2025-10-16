@@ -1,101 +1,106 @@
 import os
-import sys
+
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 import logging
-import argparse
-import warnings
+import os
+from pathlib import Path
 
-# Suppress TensorFlow and Protobuf warnings
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-warnings.filterwarnings('ignore', category=UserWarning, module='google.protobuf')
-
-# Setup logging
-logging.basicConfig(level=logging.INFO)
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
-def setup_project():
-    """Initial project setup"""
-    logger.info("Setting up Givi project...")
-    
-    # Create necessary directories
-    os.makedirs("data/processed", exist_ok=True)
-    os.makedirs("saved_models", exist_ok=True)
-    
-    # Generate sample data if not exists
-    data_file = "data/processed/delivery_data.csv"
-    if not os.path.exists(data_file):
-        logger.info("Generating sample data...")
-        os.system("python data/sample_data.py")
-    
-    # Train model if not exists
-    model_file = "saved_models/givi_lstm_model.h5"
-    if not os.path.exists(model_file):
-        logger.info("Training LSTM model...")
-        os.system("python train_model.py")
-    
-    logger.info("Setup complete!")
+# Create FastAPI app
+app = FastAPI(
+    title="Delivery Time Prediction API",
+    description="AI-powered delivery time prediction using geolocation and LSTM",
+    version="2.0.0"
+)
 
-def run_app():
-    """Run the FastAPI application with proper reload configuration"""
-    logger.info("Starting Givi Smart Delivery Predictions...")
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Create necessary directories
+os.makedirs('static', exist_ok=True)
+os.makedirs('templates', exist_ok=True)
+os.makedirs('data', exist_ok=True)
+os.makedirs('saved_models', exist_ok=True)
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Import routes
+from api.routes import router as api_router
+app.include_router(api_router, prefix="/api", tags=["predictions"])
+
+
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    """Serve the main web interface."""
+    try:
+        with open("templates/index.html", "r") as f:
+            return f.read()
+    except FileNotFoundError:
+        return """
+        <html>
+            <head><title>Error</title></head>
+            <body>
+                <h1>Error: Web interface not found</h1>
+                <p>Please ensure templates/index.html exists</p>
+            </body>
+        </html>
+        """
+
+
+@app.get("/docs-redirect")
+async def docs_redirect():
+    """Redirect to API documentation."""
+    return {"message": "Visit /docs for API documentation"}
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Startup tasks."""
+    logger.info("=" * 60)
+    logger.info("DELIVERY TIME PREDICTION API STARTING")
+    logger.info("=" * 60)
+    logger.info(f"API Documentation: http://localhost:8000/docs")
+    logger.info(f"Web Interface: http://localhost:8000")
+    logger.info("=" * 60)
     
-    # Use uvicorn directly with reload exclusions
+    # Check if model exists
+    if not os.path.exists("saved_models/delivery_model.h5"):
+        logger.warning("⚠️  No trained model found!")
+        logger.warning("Please run: python train_model.py")
+    else:
+        logger.info("✅ Trained model found")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on shutdown."""
+    logger.info("Shutting down Delivery Time Prediction API")
+
+
+if __name__ == "__main__":
     import uvicorn
     
+    # Run the server
     uvicorn.run(
         "app:app",
         host="0.0.0.0",
         port=8000,
         reload=True,
-        reload_excludes=[
-            "venv/*",
-            "env/*",
-            ".venv/*",
-            "*/site-packages/*",
-            "*/__pycache__/*",
-            ".git/*",
-            "*.pyc",
-            "*.pyo",
-            "*.log",
-            "data/*",
-            "saved_models/*",
-            "run.py",  # Exclude this launcher script
-        ],
-        reload_includes=["*.py"],  # Only watch Python files
-        reload_dirs=["api", "models"],  # Only watch specific code directories (exclude root)
         log_level="info"
     )
-
-def run_tests():
-    """Run test suite"""
-    logger.info("Running tests...")
-    os.system("pytest tests/ -v")
-
-def main():
-    parser = argparse.ArgumentParser(description="Givi Smart Delivery Predictions")
-    parser.add_argument("--setup", action="store_true", help="Setup project")
-    parser.add_argument("--test", action="store_true", help="Run tests")
-    parser.add_argument("--train", action="store_true", help="Train model")
-    parser.add_argument("--no-reload", action="store_true", help="Run without auto-reload")
-    
-    args = parser.parse_args()
-    
-    if args.setup:
-        setup_project()
-    elif args.test:
-        run_tests()
-    elif args.train:
-        os.system("python train_model.py")
-    else:
-        # Default: setup and run
-        setup_project()
-        
-        if args.no_reload:
-            # Run without reload
-            logger.info("Starting Givi Smart Delivery Predictions (no auto-reload)...")
-            import uvicorn
-            uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=False)
-        else:
-            run_app()
-
-if __name__ == "__main__":
-    main()

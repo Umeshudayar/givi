@@ -47,7 +47,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 0 24px;
         }
@@ -160,6 +160,12 @@
             padding: 40px 0 80px;
         }
 
+        .main-content {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 24px;
+        }
+
         .glass-card {
             background: rgba(30, 41, 59, 0.6);
             backdrop-filter: blur(20px);
@@ -169,9 +175,46 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
 
+        .map-panel {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-panel h2 {
+            margin-bottom: 16px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #map-container {
+            flex: 1;
+            min-height: 600px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(51, 65, 85, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        #map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: 1fr;
             gap: 24px;
             margin-bottom: 32px;
         }
@@ -188,10 +231,12 @@
             color: var(--text);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .form-group input,
-        .form-group select {
+        .form-group input {
             padding: 16px 20px;
             background: var(--bg-input);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -202,8 +247,7 @@
             transition: all 0.3s;
         }
 
-        .form-group input:focus,
-        .form-group select:focus {
+        .form-group input:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 4px var(--primary-glow);
@@ -344,9 +388,21 @@
             font-weight: 600;
         }
 
+        .confidence-badge.medium {
+            background: rgba(245, 158, 11, 0.2);
+            border-color: rgba(245, 158, 11, 0.4);
+            color: var(--warning);
+        }
+
+        .confidence-badge.low {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #ef4444;
+        }
+
         .result-details {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             position: relative;
             z-index: 1;
@@ -378,6 +434,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
             padding: 40px;
+            margin-top: 32px;
         }
 
         .factors-title {
@@ -433,6 +490,46 @@
             line-height: 1.6;
         }
 
+        .examples {
+            margin-top: 32px;
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .examples h4 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+
+        .example-item {
+            padding: 16px;
+            margin: 12px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .example-item:hover {
+            background: rgba(59, 130, 246, 0.1);
+            transform: translateX(8px);
+        }
+
+        .example-item i {
+            color: var(--primary);
+        }
+
         .error-message {
             display: none;
             padding: 20px;
@@ -471,13 +568,13 @@
             color: var(--text);
         }
 
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 40px;
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
             }
             
-            .form-grid {
-                grid-template-columns: 1fr;
+            .hero h1 {
+                font-size: 40px;
             }
             
             .result-details {
@@ -533,85 +630,111 @@
 
         <section class="prediction-section">
             <div class="container">
-                <div class="glass-card">
-                    <form id="deliveryForm">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="restaurant"><i class="fas fa-utensils"></i> Restaurant</label>
-                                <input type="text" id="restaurant" placeholder="Enter restaurant name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="location"><i class="fas fa-location-dot"></i> Delivery Address</label>
-                                <input type="text" id="location" placeholder="Your delivery location" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="orderTime"><i class="fas fa-clock"></i> Order Time</label>
-                                <input type="time" id="orderTime" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="orderType"><i class="fas fa-bolt"></i> Priority</label>
-                                <select id="orderType">
-                                    <option value="standard">Standard Delivery</option>
-                                    <option value="priority">Priority Delivery</option>
-                                    <option value="scheduled">Scheduled Delivery</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="predict-btn">
-                            <span>Predict Delivery Time</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                        
-                        <div class="loading" id="loading">
-                            <div class="loading-spinner"></div>
-                            <p style="color: var(--text-muted);">Analyzing delivery patterns with AI...</p>
-                        </div>
-                        
-                        <div class="error-message" id="errorMessage">
-                            <i class="fas fa-triangle-exclamation"></i>
-                            <span id="errorText">Something went wrong</span>
-                        </div>
-                    </form>
-                    
-                    <div class="results-container" id="resultsContainer">
-                        <div class="result-card">
-                            <div class="result-header">
-                                <div>
-                                    <h2 style="font-size: 20px; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;">ESTIMATED ARRIVAL</h2>
-                                    <div class="result-time">
-                                        <span class="result-time-value" id="predictionTime">24</span>
-                                        <span class="result-time-unit">min</span>
-                                    </div>
+                <div class="main-content">
+                    <!-- Prediction Panel -->
+                    <div class="glass-card">
+                        <form id="deliveryForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="restaurant"><i class="fas fa-utensils"></i> Restaurant Location</label>
+                                    <input type="text" id="restaurant" placeholder="e.g., Domino's Thane West, Maharashtra" required>
                                 </div>
-                                <div class="confidence-badge">
-                                    <i class="fas fa-check-circle"></i>
-                                    <span id="confidenceText">85% Confidence</span>
+                                <div class="form-group">
+                                    <label for="location"><i class="fas fa-location-dot"></i> Delivery Location</label>
+                                    <input type="text" id="location" placeholder="e.g., Dombivli East, Thane" required>
                                 </div>
                             </div>
                             
-                            <div class="result-details">
-                                <div class="detail-item">
-                                    <i class="fas fa-store"></i>
-                                    <span id="restaurantName">Restaurant</span>
+                            <button type="submit" class="predict-btn">
+                                <span>Predict Delivery Time</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                            
+                            <div class="loading" id="loading">
+                                <div class="loading-spinner"></div>
+                                <p style="color: var(--text-muted);">Analyzing delivery patterns with AI...</p>
+                            </div>
+                            
+                            <div class="error-message" id="errorMessage">
+                                <i class="fas fa-triangle-exclamation"></i>
+                                <span id="errorText">Something went wrong</span>
+                            </div>
+                        </form>
+                        
+                        <div class="results-container" id="resultsContainer">
+                            <div class="result-card">
+                                <div class="result-header">
+                                    <div>
+                                        <h2 style="font-size: 20px; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;">ESTIMATED ARRIVAL</h2>
+                                        <div class="result-time">
+                                            <span class="result-time-value" id="predictionTime">24</span>
+                                            <span class="result-time-unit">min</span>
+                                        </div>
+                                    </div>
+                                    <div class="confidence-badge" id="confidenceBadge">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span id="confidenceText">85% Confidence</span>
+                                    </div>
                                 </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <span id="deliveryLocation">Location</span>
+                                
+                                <div class="result-details">
+                                    <div class="detail-item">
+                                        <i class="fas fa-store"></i>
+                                        <span id="restaurantName">Restaurant</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span id="deliveryLocation">Location</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-route"></i>
+                                        <span id="distance">Distance</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="fas fa-traffic-light"></i>
+                                        <span id="traffic">Traffic</span>
+                                    </div>
                                 </div>
-                                <div class="detail-item">
-                                    <i class="fas fa-clock"></i>
-                                    <span id="orderTimeDisplay">Time</span>
-                                </div>
+                            </div>
+
+                            <div class="factors-card">
+                                <h3 class="factors-title">
+                                    <i class="fas fa-chart-line"></i>
+                                    Impact Factors
+                                </h3>
+                                <div id="factorsList"></div>
                             </div>
                         </div>
 
-                        <div class="factors-card">
-                            <h3 class="factors-title">
-                                <i class="fas fa-chart-line"></i>
-                                Impact Factors
-                            </h3>
-                            <div id="factorsList"></div>
+                        <div class="examples">
+                            <h4><i class="fas fa-lightbulb"></i> Try these examples:</h4>
+                            <div class="example-item" onclick="fillExample('Domino\'s Thane West, Thane, Maharashtra', 'Dombivli East, Thane')">
+                                <i class="fas fa-location-dot"></i>
+                                <span>Thane to Dombivli (~15 km)</span>
+                            </div>
+                            <div class="example-item" onclick="fillExample('Pizza Hut Andheri West, Mumbai', 'Goregaon East, Mumbai')">
+                                <i class="fas fa-location-dot"></i>
+                                <span>Andheri to Goregaon (~5 km)</span>
+                            </div>
+                            <div class="example-item" onclick="fillExample('McDonald\'s Connaught Place, New Delhi', 'Rohini, Delhi')">
+                                <i class="fas fa-location-dot"></i>
+                                <span>CP to Rohini (~20 km)</span>
+                            </div>
+                            <div class="example-item" onclick="fillExample('Truffles Koramangala, Bangalore', 'Whitefield, Bangalore')">
+                                <i class="fas fa-location-dot"></i>
+                                <span>Koramangala to Whitefield (~16 km)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Map Panel -->
+                    <div class="map-panel">
+                        <h2><i class="fas fa-map-marked-alt"></i> Delivery Route Map</h2>
+                        <div id="map-container">
+                            <div style="text-align: center;">
+                                <p style="font-size: 48px; margin-bottom: 10px;">🗺️</p>
+                                <p>Make a prediction to see the delivery route</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -639,7 +762,11 @@
     </footer>
 
     <script>
-        document.getElementById('orderTime').value = new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
+        // Fill example data
+        function fillExample(restaurant, delivery) {
+            document.getElementById('restaurant').value = restaurant;
+            document.getElementById('location').value = delivery;
+        }
         
         document.getElementById('deliveryForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -648,6 +775,7 @@
             const result = document.getElementById('resultsContainer');
             const errorMessage = document.getElementById('errorMessage');
             const submitBtn = document.querySelector('.predict-btn');
+            const mapContainer = document.getElementById('map-container');
             
             loading.style.display = 'block';
             result.style.display = 'none';
@@ -655,10 +783,8 @@
             submitBtn.disabled = true;
             
             const data = {
-                restaurant: document.getElementById('restaurant').value,
-                location: document.getElementById('location').value,
-                orderTime: document.getElementById('orderTime').value,
-                orderType: document.getElementById('orderType').value
+                restaurant_location: document.getElementById('restaurant').value,
+                delivery_location: document.getElementById('location').value
             };
             
             try {
@@ -672,32 +798,68 @@
                 
                 const prediction = await response.json();
                 
-                document.getElementById('predictionTime').textContent = prediction.estimatedTime;
-                document.getElementById('confidenceText').textContent = `${Math.round(prediction.confidence * 100)}% Confidence`;
-                document.getElementById('restaurantName').textContent = data.restaurant;
-                document.getElementById('deliveryLocation').textContent = data.location;
-                document.getElementById('orderTimeDisplay').textContent = data.orderTime;
+                // Update prediction time
+                document.getElementById('predictionTime').textContent = Math.round(prediction.predicted_time_minutes);
                 
+                // Update confidence
+                const confidence = prediction.confidence_percentage;
+                const confidenceBadge = document.getElementById('confidenceBadge');
+                const confidenceText = document.getElementById('confidenceText');
+                
+                confidenceText.textContent = `${Math.round(confidence)}% Confidence`;
+                
+                // Reset confidence badge classes
+                confidenceBadge.className = 'confidence-badge';
+                
+                // Set confidence badge style based on value
+                if (confidence >= 80) {
+                    confidenceBadge.classList.add('high');
+                } else if (confidence >= 60) {
+                    confidenceBadge.classList.add('medium');
+                } else {
+                    confidenceBadge.classList.add('low');
+                }
+                
+                // Update other details
+                document.getElementById('restaurantName').textContent = data.restaurant_location;
+                document.getElementById('deliveryLocation').textContent = data.delivery_location;
+                document.getElementById('distance').textContent = `${prediction.distance_km.toFixed(2)} km`;
+                document.getElementById('traffic').textContent = `${prediction.traffic_multiplier.toFixed(2)}x`;
+                
+                // Update factors
                 const factorsList = document.getElementById('factorsList');
                 factorsList.innerHTML = '';
                 
-                prediction.factors.forEach(factor => {
-                    const icons = {
-                        high: 'fa-exclamation-circle',
-                        medium: 'fa-info-circle',
-                        low: 'fa-check-circle'
-                    };
-                    
-                    factorsList.innerHTML += `
-                        <div class="factor impact-${factor.impact}">
-                            <i class="fas ${icons[factor.impact]}"></i>
-                            <div class="factor-content">
-                                <h4>${factor.name}</h4>
-                                <p>${factor.description}</p>
+                if (prediction.affecting_factors && prediction.affecting_factors.length > 0) {
+                    prediction.affecting_factors.forEach(factor => {
+                        // Determine impact level based on factor text
+                        let impact = 'medium';
+                        let icon = 'fa-info-circle';
+                        
+                        if (factor.includes('Heavy traffic') || factor.includes('Rush hour') || factor.includes('Long distance')) {
+                            impact = 'high';
+                            icon = 'fa-exclamation-circle';
+                        } else if (factor.includes('Light traffic') || factor.includes('Short distance')) {
+                            impact = 'low';
+                            icon = 'fa-check-circle';
+                        }
+                        
+                        factorsList.innerHTML += `
+                            <div class="factor impact-${impact}">
+                                <i class="fas ${icon}"></i>
+                                <div class="factor-content">
+                                    <h4>${factor}</h4>
+                                    <p>This factor is affecting the delivery time</p>
+                                </div>
                             </div>
-                        </div>
-                    `;
-                });
+                        `;
+                    });
+                }
+                
+                // Load map if available
+                if (prediction.map_url) {
+                    mapContainer.innerHTML = `<iframe src="${prediction.map_url}"></iframe>`;
+                }
                 
                 loading.style.display = 'none';
                 result.style.display = 'block';
@@ -711,6 +873,29 @@
                 submitBtn.disabled = false;
             }
         });
+
+        // Check model status on load
+        async function checkModelStatus() {
+            try {
+                const response = await fetch('/api/model/status');
+                const data = await response.json();
+                
+                if (!data.ready) {
+                    const errorMessage = document.getElementById('errorMessage');
+                    const errorText = document.getElementById('errorText');
+                    const submitBtn = document.querySelector('.predict-btn');
+                    
+                    errorText.textContent = 'Model not trained yet. Please train the model first by running train_model.py';
+                    errorMessage.style.display = 'block';
+                    submitBtn.disabled = true;
+                }
+            } catch (err) {
+                console.error('Status check failed:', err);
+            }
+        }
+
+        // Check status on page load
+        checkModelStatus();
     </script>
 </body>
 </html>
